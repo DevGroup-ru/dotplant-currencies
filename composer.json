@@ -1,0 +1,41 @@
+{
+  "name": "dotplant/currencies",
+  "description": "DotPlant currencies subsystem",
+  "type": "dotplant-extension",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Pavel Naumov",
+      "email": "huggbies@email.su"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "florianv/swap": "*",
+    "devgroup/yii2-extensions-manager": "dev-master",
+    "devgroup/yii2-admin-utils": "dev-master",
+    "kartik-v/yii2-widget-switchinput": "*"
+  },
+  "require-dev" : {
+  },
+  "autoload": {
+    "psr-4": {
+      "DotPlant\\Currencies\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "DotPlant\\Currencies\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "yii2-extension": {
+      "name": "DotPlant Currencies",
+      "name_ru": "DotPlant Валюты",
+      "iconUrl": "",
+      "description_ru": "Расширение для работы с валютами в DotPlant"
+    },
+    "configurables": "src/configurables.php",
+    "translationCategory": "dotplant.currencies"
+  }
+}
