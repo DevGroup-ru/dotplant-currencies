@@ -1,14 +1,18 @@
 <?php
 namespace DotPlant\Currencies\models;
 
+use DotPlant\Currencies\controllers\CurrencyRateProviderController;
 use DevGroup\ExtensionsManager\models\BaseConfigurationModel;
 use DotPlant\Currencies\controllers\CurrenciesController;
-use DotPlant\Currencies\controllers\CurrencyRateProviderController;
+use DotPlant\Currencies\commands\CurrencyController;
 use DotPlant\Currencies\CurrenciesModule;
 use Yii;
 
 class CurrenciesConfiguration extends BaseConfigurationModel
 {
+    /**
+     * @param array $config
+     */
     public function __construct($config = [])
     {
         $attributes = [
@@ -40,13 +44,16 @@ class CurrenciesConfiguration extends BaseConfigurationModel
         ];
     }
 
+    /**
+     * @inheritdoc
+     */
     public function attributeLabels()
     {
         return [
             'currenciesStorage' => Yii::t('dotplant.currencies', 'Currencies storage'),
-            'providersStorage' => Yii::t('dotplant.currencies', 'Currency providers storage'),
+            'providersStorage' => Yii::t('dotplant.currencies', 'Currency rate providers storage'),
             'currenciesCacheKey' => Yii::t('dotplant.currencies', 'Currencies cache key'),
-            'providersCacheKey' => Yii::t('dotplant.currencies', 'Currency providers cache key'),
+            'providersCacheKey' => Yii::t('dotplant.currencies', 'Currency rate providers cache key'),
         ];
     }
 
@@ -76,7 +83,11 @@ class CurrenciesConfiguration extends BaseConfigurationModel
      */
     public function consoleApplicationAttributes()
     {
-        return [];
+        return [
+            'controllerMap' => [
+                'currencies' => CurrencyController::className(),
+            ]
+        ];
     }
 
     /**

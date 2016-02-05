@@ -1,9 +1,9 @@
 <?php
 namespace DotPlant\Currencies\actions;
 
-use Yii;
-use yii\base\Action;
 use yii\base\InvalidParamException;
+use yii\base\Action;
+use Yii;
 
 class ResetAction extends Action
 {
@@ -27,11 +27,22 @@ class ResetAction extends Action
         parent::init();
         $this->storage = Yii::getAlias($this->storage);
         if (false === class_exists($this->className)) {
-            throw new InvalidParamException(Yii::t('dotplant.currencies', "Class \"{$this->className}\" not found!"));
+            throw new InvalidParamException(
+                Yii::t(
+                    'dotplant.currencies',
+                    'Class "{className}" not found!',
+                    ['className' => $this->className]
+                )
+            );
         }
         if (false === file_exists($this->storage)) {
             throw new InvalidParamException(
-                Yii::t('dotplant.currencies', "\"{$this->storage}\" is not valid \"{$this->itemName}\" storage file!")
+                Yii::t(
+                    'dotplant.currencies',
+                    '"{storage}" is not valid "{itemName}" storage file!',
+                    ['storage' => $this->storage, 'itemName' => $this->itemName]
+
+                )
             );
         }
         if (true === empty($this->returnUrl)) {
@@ -48,7 +59,7 @@ class ResetAction extends Action
         $class = $this->className;
         $class::invalidateCache();
         Yii::$app->session->setFlash(
-            'info',  ucfirst($this->itemName) . Yii::t('dotplant.currencies', ' reset to defaults.')
+            'info', mb_convert_case($this->itemName, MB_CASE_TITLE, "UTF-8") . Yii::t('dotplant.currencies', ' reset to defaults.')
         );
         $this->controller->redirect($this->returnUrl);
     }

@@ -4,11 +4,12 @@ namespace DotPlant\Currencies\components\swap\provider;
 
 use DotPlant\Currencies\models\CurrencyRateProvider;
 use Ivory\HttpAdapter\HttpAdapterInterface;
+use Swap\Provider\AbstractProvider;
 use Swap\Exception\Exception;
 use Swap\Model\CurrencyPair;
 use Swap\Model\Rate;
-use Swap\Provider\AbstractProvider;
 use Swap\Swap;
+use Yii;
 
 /**
  * Class MultiProvider
@@ -17,12 +18,12 @@ use Swap\Swap;
 class CurrencyRateMultiProvider extends AbstractProvider
 {
     /**
-     * @var int Main provider id
+     * @var string Main provider name
      */
     public $mainProvider;
 
     /**
-     * @var int[] Second provider ids
+     * @var string Second provider name
      */
     public $secondProvider;
 
@@ -31,6 +32,12 @@ class CurrencyRateMultiProvider extends AbstractProvider
      */
     public $criticalDifference;
 
+    /**
+     * @param HttpAdapterInterface $httpAdapter
+     * @param $secondProvider
+     * @param $mainProvider
+     * @param int $criticalDifference
+     */
     public function __construct(
         HttpAdapterInterface $httpAdapter,
         $secondProvider,
@@ -42,22 +49,26 @@ class CurrencyRateMultiProvider extends AbstractProvider
         $this->secondProvider = $secondProvider;
     }
 
+    /**
+     * @param CurrencyPair $currencyPair
+     * @return Rate
+     * @throws Exception
+     */
     public function fetchRate(CurrencyPair $currencyPair)
     {
-        $providerIds = [
-            (int) $this->mainProvider,
-            (int) $this->secondProvider
+        $providers = [
+            $this->mainProvider => CurrencyRateProvider::getByName($this->mainProvider),
+            $this->secondProvider => CurrencyRateProvider::getByName($this->secondProvider),
         ];
-        /** @var CurrencyRateProvider[] $providers */
-        $providers = CurrencyRateProvider::find()
-            ->where(['id' => $providerIds])
-            ->orderBy(['FIELD (`id`, ' . implode(',', $providerIds) . ')' => ''])
-            ->all();
         if (count($providers) !== 2) {
             throw new Exception('One of providers not found');
         }
         $rates = [];
-        foreach ($providers as $provider) {
+        /** @var CurrencyRateProvider $provider */
+        foreach ($providers as $name => $provider) {
+            if (null === $provider) {
+                throw new Exception("Provider \"{$name}\" not found!");
+            }
             try {
                 $providerHandler = $provider->getImplementationInstance($this->httpAdapter);
                 if ($providerHandler !== null) {

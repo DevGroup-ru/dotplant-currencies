@@ -2,10 +2,10 @@
 
 namespace DotPlant\Currencies\models;
 
-use DotPlant\Currencies\CurrenciesModule;
 use Ivory\HttpAdapter\HttpAdapterInterface;
-use Yii;
+use DotPlant\Currencies\CurrenciesModule;
 use yii\helpers\Json;
+use Yii;
 
 /**
  * Model for storing name and params of Currency Rate Providers
@@ -25,6 +25,9 @@ class CurrencyRateProvider extends BaseFileModel
     protected static $storage;
     protected static $models = [];
 
+    /**
+     * @inheritdoc
+     */
     public function init()
     {
         parent::init();
@@ -65,7 +68,25 @@ class CurrencyRateProvider extends BaseFileModel
     }
 
     /**
+     * @inheritdoc
+     */
+    public function afterDelete()
+    {
+        parent::afterDelete();
+        $currencies = Currency::findAll();
+        /** @var Currency $currency */
+        foreach ($currencies as $currency) {
+            if ($this->name == $currency->currency_rate_provider_name) {
+                $currency->currency_rate_provider_name = null;
+                $currency->save();
+            }
+        }
+
+    }
+
+    /**
      * Returns Swap provider instance for currency rate gathering
+     *
      * @param HttpAdapterInterface $httpAdapter
      * @return \Swap\ProviderInterface
      */

@@ -1,12 +1,12 @@
 <?php
 use DotPlant\Currencies\CurrenciesModule;
 use DotPlant\Currencies\models\Currency;
-use yii\helpers\Html;
-use kartik\icons\Icon;
 use DevGroup\AdminUtils\Helper;
 use yii\grid\GridView;
+use kartik\icons\Icon;
+use yii\helpers\Html;
 
-$currencies = CurrenciesModule::module()->getCurrencies();
+$currencies = CurrenciesModule::module()->getData(Currency::className());
 $currenciesProvider = new \yii\data\ArrayDataProvider([
         'allModels' => Currency::findAll(),
         'pagination' => [
@@ -63,12 +63,6 @@ echo GridView::widget([
         ],
         'convert_nominal',
         'convert_rate',
-        [
-            'attribute' => 'intl_formatting',
-            'content' => function ($data) {
-                return Yii::$app->formatter->asBoolean($data->intl_formatting);
-            }
-        ],
         'currency_rate_provider_name',
         [
             'class' => 'DevGroup\AdminUtils\columns\ActionColumn',

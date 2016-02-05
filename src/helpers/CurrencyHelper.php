@@ -2,6 +2,7 @@
 namespace DotPlant\Currencies\helpers;
 
 use DotPlant\Currencies\models\Currency;
+use Yii;
 
 class CurrencyHelper
 {
@@ -9,34 +10,13 @@ class CurrencyHelper
      * @var Currency $userCurrency
      * @var Currency $mainCurrency
      */
-    static protected $userCurrency = null;
-    static protected $mainCurrency = null;
-
-//    /**
-//     * @return Currency
-//     */
-//    static public function getUserCurrency()
-//    {
-//        if (null === static::$userCurrency) {
-//            static::$userCurrency = static::findCurrencyByIso(UserPreferences::preferences()->userCurrency);
-//        }
-//
-//        return static::$userCurrency;
-//    }
-//
-//    /**
-//     * @param Currency $userCurrency
-//     * @return Currency
-//     */
-//    static public function setUserCurrency(Currency $userCurrency)
-//    {
-//        return static::$userCurrency = $userCurrency;
-//    }
+    protected static $userCurrency = null;
+    protected static $mainCurrency = null;
 
     /**
      * @return Currency
      */
-    static public function getMainCurrency()
+    public static function getMainCurrency()
     {
         return null === static::$mainCurrency
             ? static::$mainCurrency = Currency::getMainCurrency()
@@ -44,72 +24,112 @@ class CurrencyHelper
     }
 
     /**
+     * Finds Currency by ISO code. Return Currency[] if $all == true
+     * if $all == false returns only first of found Currency
+     * If there are no Currency with given code can return MainCurrency or null, depends on $useMainCurrency
+     *
      * @param string $code
-     * @param bool|true $useMainCurrency
-     * @return Currency
+     * @param bool $useMainCurrency
+     * @param bool $all
+     * @return Currency|Currency[]|null
      */
-    static public function findCurrencyByIso($code)
+    public static function findCurrencyByIso($code, $useMainCurrency = false, $all = false)
     {
-        $currency = Currency::find()->where(['iso_code' => $code])->one();
-        $currency = null === $currency ? static::getMainCurrency() : $currency;
-        return $currency;
+        $currencies = Currency::findAll();
+        $currencies = array_filter($currencies, function ($e) use ($code) {
+            /** @var  Currency $e */
+            return $code == $e->iso_code;
+        });
+        $out = null;
+        if (false === empty($currencies)) {
+            if (true === $all) {
+                $out = $currencies;
+            } else {
+                $out = array_shift($currencies);
+            }
+        } else {
+            if (true === $useMainCurrency) {
+                $out = static::getMainCurrency();
+            } else {
+                $out = null;
+            }
+        }
+        return $out;
     }
 
     /**
      * @param float|int $input
      * @param Currency $from
      * @param Currency $to
+     * @param bool $format
      * @return float|int
      */
-    static public function convertCurrencies($input = 0, Currency $from, Currency $to)
+    public static function convertCurrencies($input = 0, Currency $from, Currency $to, $format = false)
     {
         if (0 === $input) {
             return $input;
         }
-
-        if ($from->id !== $to->id) {
+        if ($from->name != $to->name) {
             $main = static::getMainCurrency();
-            if ($main->id === $from->id && $main->id !== $to->id) {
+            if ($main->name == $from->name && $main->name != $to->name) {
                 $input = $input / $to->convert_rate * $to->convert_nominal;
-            } elseif ($main->id !== $from->id && $main->id === $to->id) {
+            } elseif ($main->name != $from->name && $main->name == $to->name) {
                 $input = $input / $from->convert_nominal * $from->convert_rate;
             } else {
                 $input = $input / $from->convert_nominal * $from->convert_rate;
                 $input = $input / $to->convert_rate * $to->convert_nominal;
             }
         }
-
-        return round($input, 2);
+        $num = round($input, 2);
+        if (true === $format) {
+            $num = self::format($num, $to);
+        }
+        return $num;
     }
 
     /**
+     * By default converts input number into MainCurrency and returns int | float
+     * Using $format = true you can get formatted string according to Currency preferences
+     *
      * @param float|int $input
      * @param Currency $from
+     * @param bool $format
      * @return float|int
      */
-//    static public function convertToUserCurrency($input = 0, Currency $from)
-//    {
-//        return static::convertCurrencies($input, $from, static::getUserCurrency());
-//    }
-
-    /**
-     * @param float|int $input
-     * @param Currency $from
-     * @return float|int
-     */
-    static public function convertToMainCurrency($input = 0, Currency $from)
+    public static function convertToMainCurrency($input = 0, Currency $from, $format = false)
     {
-        return static::convertCurrencies($input, $from, static::getMainCurrency());
+        return static::convertCurrencies($input, $from, static::getMainCurrency(), $format);
     }
 
     /**
+     * By default converts input number from MainCurrency into given Currency and returns int | float
+     * Using $format = true you can get formatted string according to Currency preferences
+     *
      * @param float|int $input
      * @param Currency $to
+     * @param bool $format
      * @return float|int
      */
-    static public function convertFromMainCurrency($input = 0, Currency $to)
+    public static function convertFromMainCurrency($input = 0, Currency $to, $format = false)
     {
-        return static::convertCurrencies($input, static::getMainCurrency(), $to);
+        return static::convertCurrencies($input, static::getMainCurrency(), $to, $format);
+    }
+
+    /**
+     * Formats price with current currency settings
+     *
+     * @param $price
+     * @param Currency $currency
+     * @return string
+     */
+    public static function format($price, Currency $currency)
+    {
+        if ($currency->intl_formatting == 1) {
+            return $currency->getFormatter()->asCurrency($price);
+        } else {
+            $number_value = $currency->getFormatter()->asDecimal($price);
+            return strtr($currency->format_string, ['#' => $number_value]);
+        }
     }
 
     /**
@@ -117,17 +137,16 @@ class CurrencyHelper
      * @param string|null $locale
      * @return string
      */
-    static public function getCurrencySymbol(Currency $currency, $locale = null)
+    public static function getCurrencySymbol(Currency $currency, $locale = null)
     {
-        $locale = null === $locale ? \Yii::$app->language : $locale;
-
+        $locale = null === $locale ? Yii::$app->language : $locale;
         $result = '';
         try {
             $fake = $locale . '@currency=' . $currency->iso_code;
             $fmt = new \NumberFormatter($fake, \NumberFormatter::CURRENCY);
             $result = $fmt->getSymbol(\NumberFormatter::CURRENCY_SYMBOL);
         } catch (\Exception $e) {
-            $result = preg_replace('%[\d\s,]%i', '', $currency->format(0));
+            $result = preg_replace('%[\d\s,]%i', '', self::format(0, $currency));
         }
 
         return $result;

@@ -1,13 +1,13 @@
 <?php
 namespace DotPlant\Currencies\controllers;
 
+use DotPlant\Currencies\models\CurrencyRateProvider;
+use DevGroup\AdminUtils\controllers\BaseController;
 use DotPlant\Currencies\actions\ItemDeleteAction;
+use DotPlant\Currencies\actions\ItemEditAction;
 use DotPlant\Currencies\actions\ResetAction;
 use DotPlant\Currencies\CurrenciesModule;
 use Yii;
-use DevGroup\AdminUtils\controllers\BaseController;
-use DotPlant\Currencies\actions\ItemEditAction;
-use DotPlant\Currencies\models\CurrencyRateProvider;
 
 class CurrencyRateProviderController extends BaseController
 {

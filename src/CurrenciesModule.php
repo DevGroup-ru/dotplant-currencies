@@ -2,23 +2,36 @@
 namespace DotPlant\Currencies;
 
 use DotPlant\Currencies\helpers\CurrencyStorageHelper;
-use DotPlant\Currencies\models\Currency;
 use DotPlant\Currencies\models\CurrencyRateProvider;
-use Yii;
+use DotPlant\Currencies\models\BaseFileModel;
+use DotPlant\Currencies\models\Currency;
+use yii\base\InvalidParamException;
 use yii\base\Module;
+use Yii;
 
 class CurrenciesModule extends Module
 {
 
-    public $currenciesStorage = '@app/config/currencies.php';
-    public $providersStorage = '@app/config/providers.php';
+    /** @var string Currency storage file */
+    public $currenciesStorage = '@app/config/dp-currencies.php';
+
+    /** @var string  CurrencyRateProvider storage file */
+    public $providersStorage = '@app/config/dp-providers.php';
+
+    /** @var string Currency[] cache key */
     public $currenciesCacheKey = 'dotplant.currencies.currenciesModels';
+
+    /** @var string CurrencyRateProvider[] cache key */
     public $providersCacheKey = 'dotplant.currencies.CurrencyRateProvidersModels';
 
-    private static $currencies;
-    private static $providers;
+    /** @var array Currency[] & CurrencyRateProvider[] loaded set */
+    private static $items = [];
 
-    private $defaultCurrencies = [
+    /** @var array default values for Currency[] & CurrencyRateProvider[] */
+    private static $defaults = [];
+
+    /** @var array  default values for Currency[] */
+    private static $defaultCurrencies = [
         'Ruble' => [
             'name' => 'Ruble',
             'iso_code' => 'RUB',
@@ -44,7 +57,8 @@ class CurrenciesModule extends Module
         ]
     ];
 
-    private $defaultProviders = [
+    /** @var array  default values for CurrencyRateProvider[] */
+    private static $defaultProviders = [
         [
             'name' => 'Google Finance',
             'class_name' => 'Swap\\Provider\\GoogleFinanceProvider',
@@ -60,43 +74,72 @@ class CurrenciesModule extends Module
         ]
     ];
 
-
-    public function getCurrencies($ignoreCache = false)
+    /**
+     * @inheritdoc
+     */
+    public function init()
     {
-        if (0 === count(self::$currencies) || true === $ignoreCache) {
-            $canLoad = false;
-            $fn = Yii::getAlias($this->currenciesStorage);
-            if (true === file_exists($fn) && is_readable($fn)) {
-                $canLoad = true;
-            } else {
-                $canLoad = CurrencyStorageHelper::generateStorage($this->defaultCurrencies, $fn, Currency::className());
-            }
-            if (true === $canLoad) {
-                self::$currencies = include $fn;
-            } else {
-                Yii::$app->session->setFlash('error', Yii::t('dotplant.currencies', 'Unable to write currencies file'));
-            }
-        }
-        return self::$currencies;
+        parent::init();
+        self::$items = [
+            Currency::className() => [],
+            CurrencyRateProvider::className() => [],
+        ];
+        self::$defaults = [
+            Currency::className() => self::$defaultCurrencies,
+            CurrencyRateProvider::className() => self::$defaultProviders,
+        ];
     }
 
-    public function getProviders($ignoreCache = false)
+    /**
+     * Loads Currency[] & CurrencyRateProvider[] from associated storage files and
+     * generates storage files if them not exists yet
+     *
+     * @param $className
+     * @param bool $ignoreCache
+     * @return mixed
+     */
+    public function getData($className, $ignoreCache = false)
     {
-        if (0 === count(self::$providers) || true === $ignoreCache) {
+        if (false === class_exists($className)) {
+            throw new InvalidParamException(
+                Yii::t(
+                    'dotplant.currencies',
+                    'Class "{className}" not found!',
+                    ['className' => $className]
+                )
+            );
+        }
+        /** @var BaseFileModel $model */
+        $model = new $className;
+        if (false === ($model instanceof BaseFileModel)) {
+            throw new InvalidParamException(
+                Yii::t(
+                    'dotplant.currencies',
+                    'Class "{className}" must be an instance of "BaseFileModel" !',
+                    ['className' => $className]
+                )
+            );
+        }
+        if (0 === count(self::$items[$className]) || true === $ignoreCache) {
             $canLoad = false;
-            $fn = Yii::getAlias($this->providersStorage);
-            if (true === file_exists($fn) && is_readable($fn)) {
+            $storage = $model->getStorage();
+            if (true === file_exists($storage) && is_readable($storage)) {
                 $canLoad = true;
             } else {
-                $canLoad = CurrencyStorageHelper::generateStorage($this->defaultProviders, $fn, CurrencyRateProvider::className());
+                $canLoad = CurrencyStorageHelper::generateStorage(self::$defaults[$className], $storage, $className);
             }
             if (true === $canLoad) {
-                self::$providers = include $fn;
+                self::$items[$className] = include $storage;
             } else {
-                Yii::$app->session->setFlash('error', Yii::t('dotplant.currencies', 'Unable to write providers file'));
+                Yii::$app->session->setFlash('error',
+                    Yii::t(
+                        'dotplant.currencies', 'Unable to write "{storage}" file.',
+                        ['storage' => $storage]
+                    )
+                );
             }
         }
-        return self::$providers;
+        return self::$items[$className];
     }
 
     /**
@@ -110,6 +153,4 @@ class CurrenciesModule extends Module
         }
         return $module;
     }
-
-
 }

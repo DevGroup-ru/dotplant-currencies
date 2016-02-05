@@ -23,7 +23,7 @@ use Yii;
  * @property string $format_string
  * @property double $additional_rate
  * @property double $additional_nominal
- * @property integer $currency_rate_provider_id
+ * @property integer $currency_rate_provider_name
  */
 class Currency extends BaseFileModel
 {
@@ -62,8 +62,12 @@ class Currency extends BaseFileModel
         'max_fraction_digits' => 2,
         'dec_point' => '.',
         'thousands_sep' => ' ',
+        'currency_rate_provider_name' => null,
     ];
 
+    /**
+     * @inheritdoc
+     */
     public function init()
     {
         parent::init();
@@ -168,10 +172,12 @@ class Currency extends BaseFileModel
 
     /**
      * Relation to CurrencyRateProvider model
-     * @return \yii\db\ActiveQuery
+     *
+     * @return CurrencyRateProvider
      */
     public function getRateProvider()
     {
+        return CurrencyRateProvider::getByName($this->currency_rate_provider_name);
     }
 
     /**
@@ -179,7 +185,7 @@ class Currency extends BaseFileModel
      * @return \yii\i18n\Formatter
      * @throws InvalidConfigException
      */
-    private function getFormatter()
+    public function getFormatter()
     {
         if ($this->formatter === null) {
             $this->formatter = Yii::createObject([
@@ -197,19 +203,17 @@ class Currency extends BaseFileModel
     }
 
     /**
-     * Formats price with current currency settings
+     * Returns Currency [] can by automatically updated using associated rate provider
      *
-     * @param $price
-     * @return string
+     * @return array
      */
-    public function format($price)
+    public static function getUpdateable()
     {
-        if ($this->intl_formatting === 1) {
-            return $this->getFormatter()->asCurrency($price);
-        } else {
-            $number_value = $this->getFormatter()->asDecimal($price);
-            return strtr($this->format_string, ['#' => $number_value]);
-        }
+        self::findAll();
+        return array_filter(self::$models, function ($item) {
+            /** @var Currency $item */
+            return false === empty($item->currency_rate_provider_name);
+        });
     }
 
     /**
@@ -232,6 +236,4 @@ class Currency extends BaseFileModel
         }
         return true;
     }
-
-
 }

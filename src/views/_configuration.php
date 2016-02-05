@@ -5,10 +5,12 @@
 use yii\bootstrap\Tabs;
 
 $this->beginBlock('basicCurrenciesConfig');
+echo '<div class="box-body">';
 echo $form->field($model, 'currenciesStorage');
 echo $form->field($model, 'providersStorage');
 echo $form->field($model, 'currenciesCacheKey');
 echo $form->field($model, 'providersCacheKey');
+echo '</div>';
 $this->endBlock('basicCurrenciesConfig');
 
 echo Tabs::widget([
@@ -25,7 +27,6 @@ echo Tabs::widget([
             'label' => Yii::t('dotplant.currencies', 'Providers'),
             'content' => $this->render('@vendor/dotplant/currencies/src/views/_providers'),
         ]
-
     ]
 ]);
 ?>

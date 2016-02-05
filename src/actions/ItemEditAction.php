@@ -2,13 +2,14 @@
 
 namespace DotPlant\Currencies\actions;
 
+use DotPlant\Currencies\models\CurrencyRateProvider;
 use DevGroup\AdminUtils\actions\FormCombinedAction;
 use DotPlant\Currencies\models\Currency;
-use DotPlant\Currencies\models\CurrencyRateProvider;
-use Yii;
 use yii\base\InvalidParamException;
-use yii\helpers\Html;
 use yii\web\NotFoundHttpException;
+use kartik\icons\Icon;
+use yii\helpers\Html;
+use Yii;
 
 class ItemEditAction extends FormCombinedAction
 {
@@ -18,13 +19,13 @@ class ItemEditAction extends FormCombinedAction
     /** @var string */
     public $className = '';
 
-    /** @var string  */
+    /** @var string */
     public $itemName = 'item';
 
-    /** @var string  */
+    /** @var string */
     public $editView = '';
 
-    /** @var string  */
+    /** @var string */
     public $storage = '';
     /** @var  string */
     private $returnUrl = '';
@@ -38,11 +39,22 @@ class ItemEditAction extends FormCombinedAction
     {
         parent::beforeActionRun();
         if (false === class_exists($this->className)) {
-            throw new InvalidParamException(Yii::t('dotplant.currencies', "Class \"{$this->className}\" not found!"));
+            throw new InvalidParamException(
+                Yii::t(
+                    'dotplant.currencies',
+                    'Class "{className}" not found!',
+                    ['className' => $this->className]
+                )
+            );
         }
         if (false === file_exists(Yii::getAlias($this->storage))) {
             throw new InvalidParamException(
-                Yii::t('dotplant.currencies', "\"{$this->storage}\" is not valid \"{$this->itemName}\" storage file!")
+                Yii::t(
+                    'dotplant.currencies',
+                    '"{storage}" is not valid "{itemName}" storage file!',
+                    ['storage' => $this->storage, 'itemName' => $this->itemName]
+
+                )
             );
         }
         $itemName = Yii::$app->request->get('id', '');
@@ -56,7 +68,7 @@ class ItemEditAction extends FormCombinedAction
         }
         if (null === $this->model) {
             throw new NotFoundHttpException(
-                ucfirst($this->itemName) . Yii::t('dotplant.currencies', ' {name} not found!', ['name' => $itemName])
+                mb_convert_case($this->itemName, MB_CASE_TITLE, "UTF-8") . Yii::t('dotplant.currencies', ' {name} not found!', ['name' => $itemName])
             );
         }
     }
@@ -72,7 +84,7 @@ class ItemEditAction extends FormCombinedAction
             ],
             'renderSectionForm' => [
                 'function' => 'renderSectionForm',
-                'title' => Yii::t('dotplant.currencies', "Edit ") . $this->itemName,
+                'title' => Yii::t('dotplant.currencies', 'Edit') . ' ' . $this->itemName,
                 'icon' => 'fa fa-cogs',
                 'footer' => $this->getFooter(),
             ],
@@ -88,7 +100,7 @@ class ItemEditAction extends FormCombinedAction
             if (true === $this->model->save()) {
                 Yii::$app->session->setFlash(
                     'success',
-                    ucfirst($this->itemName) . Yii::t('dotplant.currencies', ' {name} successfully updated!', ['name' => $this->model->name])
+                    mb_convert_case($this->itemName, MB_CASE_TITLE, "UTF-8") . Yii::t('dotplant.currencies', ' {name} successfully updated!', ['name' => $this->model->name])
                 );
                 $this->controller->redirect($this->returnUrl);
             } else {
@@ -121,11 +133,33 @@ class ItemEditAction extends FormCombinedAction
      */
     public function getFooter()
     {
-        return Html::submitButton(
-            '<i class="fa fa-floppy-o"></i>&nbsp;' .
-            (Yii::t('dotplant.currencies', 'Save')),
-            ['class' => 'btn btn-primary pull-right']
-        );
+        $deleteButton = $this->model->isNewItem()
+            ? ''
+            : Html::a(
+                Icon::show('trash-o') . '&nbsp;'
+                . (Yii::t('dotplant.currencies', 'Delete')),
+                [
+                    $this->controller->id . '/delete',
+                    'id' => $this->model->name,
+                    'returnUrl' => $this->returnUrl,
+                ],
+                ['class' => 'btn btn-danger']
+            );
+        return
+            Html::tag('div',
+                $deleteButton
+                . Html::a(
+                    Yii::t('dotplant.currencies', 'Back'),
+                    $this->returnUrl,
+                    ['class' => 'btn btn-primary']
+                )
+                . Html::submitButton(
+                    Icon::show('floppy-o') . '&nbsp;'
+                    . (Yii::t('dotplant.currencies', 'Save')),
+                    ['class' => 'btn btn-primary']
+                ),
+                ['class' => 'btn-group pull-right', 'role' => 'group', 'aria-label' => 'Edit buttons']
+            );
     }
 
     /**
@@ -141,6 +175,6 @@ class ItemEditAction extends FormCombinedAction
      */
     public function title()
     {
-        return Yii::t('dotplant.currencies', "Edit ") . $this->itemName;
+        return Yii::t('dotplant.currencies', 'Edit') . ' ' . $this->itemName;
     }
 }

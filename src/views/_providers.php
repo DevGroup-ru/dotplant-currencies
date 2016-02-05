@@ -1,12 +1,12 @@
 <?php
-use DotPlant\Currencies\CurrenciesModule;
 use DotPlant\Currencies\models\CurrencyRateProvider;;
-use yii\helpers\Html;
-use kartik\icons\Icon;
+use DotPlant\Currencies\CurrenciesModule;
 use DevGroup\AdminUtils\Helper;
 use yii\grid\GridView;
+use kartik\icons\Icon;
+use yii\helpers\Html;
 
-$currencies = CurrenciesModule::module()->getProviders();
+$currencies = CurrenciesModule::module()->getData(CurrencyRateProvider::className());
 $currenciesProvider = new \yii\data\ArrayDataProvider([
         'allModels' => CurrencyRateProvider::findAll(),
         'pagination' => [

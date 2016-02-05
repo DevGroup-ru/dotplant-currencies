@@ -2,9 +2,10 @@
 
 namespace DotPlant\Currencies\components\swap\provider;
 
+use Swap\Provider\AbstractProvider;
+use \Swap\Exception\Exception;
 use Swap\Model\CurrencyPair;
 use Swap\Model\Rate;
-use Swap\Provider\AbstractProvider;
 
 class CbrFinanceProvider extends AbstractProvider
 {
@@ -23,7 +24,7 @@ class CbrFinanceProvider extends AbstractProvider
         if (array_key_exists(0, $res)) {
             return new Rate(str_replace(',', '.', $res[0]->Value), new \DateTime());
         } else {
-            throw new \Swap\Exception\Exception('The currency is not supported');
+            throw new Exception('The currency is not supported');
         }
     }
 

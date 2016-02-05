@@ -1,26 +1,26 @@
 <?php
 namespace DotPlant\Currencies\models;
 
-use DotPlant\Currencies\CurrenciesModule;
-use DotPlant\Currencies\events\FileModelEvent;
 use DotPlant\Currencies\helpers\CurrencyStorageHelper;
-use Yii;
-use yii\base\InvalidCallException;
-use yii\base\InvalidParamException;
+use DotPlant\Currencies\events\FileModelEvent;
+use DotPlant\Currencies\CurrenciesModule;
 use yii\base\Model;
+use Yii;
 
 class BaseFileModel extends Model
 {
     public $name;
 
     protected static $cacheKey;
-    protected static $storage;
+    protected static $storage = '';
 
     protected static $models = [];
 
     const SCENARIO_NEW = 'new-dp-currencies-item';
     const EVENT_BEFORE_SAVE = 'dp-currency-item-before-save';
     const EVENT_BEFORE_UPDATE = 'dp-currency-item-before-update';
+    const EVENT_BEFORE_DELETE = 'dp-currency-item-before-delete';
+    const EVENT_AFTER_DELETE = 'dp-currency-item-after-delete';
 
     protected $defaults = [];
 
@@ -45,8 +45,7 @@ class BaseFileModel extends Model
             $models = Yii::$app->cache->get(static::$cacheKey);
             if (false === $models) {
                 $models = [];
-                $method = self::getMethod();
-                $items = CurrenciesModule::module()->$method(true);
+                $items = CurrenciesModule::module()->getData(static::className(), true);
                 foreach ($items as $item) {
                     $model = new static;
                     $model->setDefaults();
@@ -64,39 +63,6 @@ class BaseFileModel extends Model
             static::$models = $models;
         }
         return static::$models;
-    }
-
-    /**
-     * Returns CurrenciesModule associated method for given model
-     *
-     * @return string
-     */
-    private static function getMethod()
-    {
-        $method = '';
-        $model = new static;
-        if ($model instanceof Currency) {
-            $method = 'getCurrencies';
-        } else if ($model instanceof CurrencyRateProvider) {
-            $method = 'getProviders';
-        } else {
-            throw new InvalidParamException(
-                Yii::t(
-                    'dotplant.currencies',
-                    'Model must be a valid instance of Currency or CurrencyRateProvider. "' . get_class($model) . '" given.'
-                )
-            );
-        }
-        if (true === method_exists(CurrenciesModule::className(), $method)) {
-            return $method;
-        } else {
-            throw new InvalidCallException(
-                Yii::t(
-                    'dotplant.currencies',
-                    "Method {$method} not exists in the CurrenciesModule!"
-                )
-            );
-        }
     }
 
     /**
@@ -122,7 +88,15 @@ class BaseFileModel extends Model
     public function isNewItem()
     {
         self::findAll();
-        return (true === empty($this->errors)) && in_array($this->name, array_keys(static::$models));
+        $new = false;
+        if (true === in_array($this->name, array_keys(static::$models))) {
+            if (false === empty($this->errors)) {
+                $new = true;
+            }
+        } else {
+            $new = true;
+        }
+        return $new;
     }
 
     /**
@@ -164,6 +138,43 @@ class BaseFileModel extends Model
     }
 
     /**
+     * Removes the model data from storage
+     *
+     * @return bool
+     */
+    public function delete()
+    {
+        $result = false;
+        if (true === $this->beforeDelete()) {
+            $result = CurrencyStorageHelper::removeFromStorage($this, static::$storage);
+            $this->afterDelete();
+        }
+        return $result;
+
+
+    }
+
+    /**
+     * This method is invoked before deleting a model data.
+     *
+     * @return bool
+     */
+    public function beforeDelete()
+    {
+        $event = new FileModelEvent;
+        $this->trigger(self::EVENT_BEFORE_DELETE, $event);
+        return $event->isValid;
+    }
+
+    /**
+     * This method is invoked after deleting a model data.
+     */
+    public function afterDelete()
+    {
+        $this->trigger(self::EVENT_AFTER_DELETE);
+    }
+
+    /**
      * Saves model data
      *
      * @return bool
@@ -172,6 +183,16 @@ class BaseFileModel extends Model
     {
         $this->beforeSave($this->isNewItem());
         return CurrencyStorageHelper::updateStorage($this, static::$storage);
+    }
+
+    /**
+     * Returns model storage
+     *
+     * @return string
+     */
+    public function getStorage()
+    {
+        return static::$storage;
     }
 
     /**
