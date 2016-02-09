@@ -161,8 +161,8 @@ class Currency extends BaseFileModel
      */
     public static function getMainCurrency()
     {
-        self::findAll();
         if (true === empty(self::$mainCurrency) || false === self::$mainCurrency instanceof self) {
+            self::findAll();
             self::$mainCurrency = array_shift(array_filter(self::$models, function ($i) {
                 return $i->is_main == 1;
             }));

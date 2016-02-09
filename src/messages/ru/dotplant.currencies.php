@@ -31,6 +31,8 @@ return [
     'Intl formatting with ICU' => 'Интернационализация через ICU',
     'Is main currency' => 'Главная валюта сайта',
     'Max fraction digits' => 'Макс. цифр после запятой',
+    'Method {method} expects array as first argument. {type} given' => 'Метод {method} ожидает массив в качестве первого параметра. Получено: {type}',
+    'Method {method} expects instance of {model}. {type} given' => 'Метод {method} ожидает объект {model} или его наследников. Получено: {type}',
     'Min fraction digits' => 'Мин. цифр после запятой',
     'Name' => 'Название',
     'Name {name} already in use!' => 'Название {name} уже занято!',

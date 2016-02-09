@@ -91,14 +91,34 @@ class CurrenciesModule extends Module
     }
 
     /**
+     * Returns default values for Currency and CurrencyRateProvider
+     *
+     * @param $className
+     * @return array
+     */
+    public function getDefaults($className)
+    {
+        $out = [];
+        if (false === empty($className)) {
+            $out = isset(self::$defaults[$className]) ? self::$defaults[$className] : [];
+        } else {
+            $out = self::$defaults;
+        }
+        return $out;
+    }
+
+    /**
      * Loads Currency[] & CurrencyRateProvider[] from associated storage files and
-     * generates storage files if them not exists yet
+     * generates storage files if them not exists yet. Using $loadDefaults storage can be generated empty or
+     * with default data
      *
      * @param $className
      * @param bool $ignoreCache
+     * @param bool $loadDefaults
+     * @throws InvalidParamException
      * @return mixed
      */
-    public function getData($className, $ignoreCache = false)
+    public function getData($className, $ignoreCache = false, $loadDefaults = true)
     {
         if (false === class_exists($className)) {
             throw new InvalidParamException(
@@ -126,7 +146,11 @@ class CurrenciesModule extends Module
             if (true === file_exists($storage) && is_readable($storage)) {
                 $canLoad = true;
             } else {
-                $canLoad = CurrencyStorageHelper::generateStorage(self::$defaults[$className], $storage, $className);
+                $data = [];
+                if (true === $loadDefaults) {
+                    $data = self::$defaults[$className];
+                }
+                $canLoad = CurrencyStorageHelper::generateStorage($data, $storage, $className);
             }
             if (true === $canLoad) {
                 self::$items[$className] = include $storage;

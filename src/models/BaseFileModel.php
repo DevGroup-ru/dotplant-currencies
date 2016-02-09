@@ -45,7 +45,7 @@ class BaseFileModel extends Model
             $models = Yii::$app->cache->get(static::$cacheKey);
             if (false === $models) {
                 $models = [];
-                $items = CurrenciesModule::module()->getData(static::className(), true);
+                $items = CurrenciesModule::module()->getData(static::className(), true, false);
                 foreach ($items as $item) {
                     $model = new static;
                     $model->setDefaults();

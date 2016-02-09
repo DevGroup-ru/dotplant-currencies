@@ -148,7 +148,6 @@ class CurrencyHelper
         } catch (\Exception $e) {
             $result = preg_replace('%[\d\s,]%i', '', self::format(0, $currency));
         }
-
         return $result;
     }
 }
