@@ -139,6 +139,8 @@ class CurrenciesConfiguration extends BaseConfigurationModel
      */
     public function aliases()
     {
-        return [];
+        return [
+            '@DotPlant/Currencies' =>  realpath(dirname(__DIR__)),
+        ];
     }
 }
