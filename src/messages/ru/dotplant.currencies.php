@@ -55,5 +55,5 @@ return [
     ' reset to defaults.' => ' сброшены к значениям по-умолчанию.',
     ' {name} not found!' => ' {name} не существует!',
     ' {name} successfully deleted!' => ' {name}. Удаление успешно!',
-    ' {name} successfully updated!' => ' {name}. Убновление успешно!',
+    ' {name} successfully updated!' => ' {name}. Обновление успешно!',
 ];
