@@ -77,7 +77,7 @@ class ItemDeleteAction extends Action
                     ' {name} successfully deleted!', ['name' => $this->model->name]
                 )
             );
-            $this->controller->redirect($this->returnUrl);
+            return $this->controller->redirect($this->returnUrl);
         } else {
             Yii::$app->session->setFlash(
                 'error',

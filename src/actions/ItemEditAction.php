@@ -102,7 +102,7 @@ class ItemEditAction extends FormCombinedAction
                     'success',
                     mb_convert_case($this->itemName, MB_CASE_TITLE, "UTF-8") . Yii::t('dotplant.currencies', ' {name} successfully updated!', ['name' => $this->model->name])
                 );
-                $this->controller->redirect($this->returnUrl);
+                return $this->controller->redirect($this->returnUrl);
             } else {
                 Yii::$app->session->setFlash(
                     'error',

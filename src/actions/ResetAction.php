@@ -61,6 +61,6 @@ class ResetAction extends Action
         Yii::$app->session->setFlash(
             'info', mb_convert_case($this->itemName, MB_CASE_TITLE, "UTF-8") . Yii::t('dotplant.currencies', ' reset to defaults.')
         );
-        $this->controller->redirect($this->returnUrl);
+        return $this->controller->redirect($this->returnUrl);
     }
 }
