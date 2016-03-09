@@ -163,9 +163,10 @@ class Currency extends BaseFileModel
     {
         if (true === empty(self::$mainCurrency) || false === self::$mainCurrency instanceof self) {
             self::findAll();
-            self::$mainCurrency = array_shift(array_filter(self::$models, function ($i) {
+            $mains = array_filter(self::$models, function ($i) {
                 return $i->is_main == 1;
-            }));
+            });
+            self::$mainCurrency = array_shift($mains);
         }
         return self::$mainCurrency;
     }
