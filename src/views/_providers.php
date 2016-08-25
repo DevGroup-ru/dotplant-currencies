@@ -18,12 +18,12 @@ $currencyButtons =
     Html::tag('div',
         Html::a(
             Icon::show('plus') . '&nbsp;' . Yii::t('dotplant.currencies', 'Add provider'),
-            ['/providers/edit', 'returnUrl' => Helper::returnUrl()],
+            ['/currencies/currency-rate-provider/edit', 'returnUrl' => Helper::returnUrl()],
             ['role' => 'button', 'class' => 'btn btn-success']
         )
         . Html::a(
             Icon::show('eraser') . '&nbsp;' . Yii::t('dotplant.currencies', 'Reset providers'),
-            ['/providers/reset', 'returnUrl' => Helper::returnUrl()],
+            ['/currencies/currency-rate-provider/reset', 'returnUrl' => Helper::returnUrl()],
             ['role' => 'button', 'class' => 'btn btn-danger']),
         ['class' => 'btn-group pull-right', 'role' => 'group', 'aria-label' => 'Providers buttons']
     );
@@ -62,13 +62,13 @@ echo GridView::widget([
             ],
             'buttons' => [
                 [
-                    'url' => '/providers/edit',
+                    'url' => '/currencies/currency-rate-provider/edit',
                     'icon' => 'pencil',
                     'class' => 'btn-primary',
                     'label' => Yii::t('dotplant.currencies', 'Edit'),
                 ],
                 [
-                    'url' => '/providers/delete',
+                    'url' => '/currencies/currency-rate-provider/delete',
                     'icon' => 'trash-o',
                     'class' => 'btn-danger',
                     'label' => Yii::t('dotplant.currencies', 'Delete'),
