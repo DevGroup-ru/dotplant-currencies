@@ -1,4 +1,5 @@
 <?php
+
 namespace DotPlant\Currencies\models;
 
 use DotPlant\Currencies\controllers\CurrencyRateProviderController;
@@ -11,24 +12,11 @@ use Yii;
 class CurrenciesConfiguration extends BaseConfigurationModel
 {
     /**
-     * @param array $config
+     * @inheritdoc
      */
-    public function __construct($config = [])
+    public function getModuleClassName()
     {
-        $attributes = [
-            'currenciesStorage',
-            'currenciesCacheKey',
-            'providersStorage',
-            'providersCacheKey',
-        ];
-
-        parent::__construct($attributes, $config);
-        /** @var CurrenciesModule $module */
-        $module = CurrenciesModule::module();
-        $this->currenciesStorage = $module->currenciesStorage;
-        $this->currenciesCacheKey = $module->currenciesCacheKey;
-        $this->providersStorage = $module->providersStorage;
-        $this->providersCacheKey = $module->providersCacheKey;
+        return CurrenciesModule::className();
     }
 
     /**
