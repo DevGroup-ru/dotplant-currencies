@@ -152,6 +152,10 @@ class CurrencyHelper
         return $result;
     }
 
+    /**
+     * Get a user currency from session
+     * @return Currency
+     */
     public static function getUserCurrency()
     {
         if (static::$userCurrency === null) {
@@ -162,6 +166,10 @@ class CurrencyHelper
         return static::$userCurrency;
     }
 
+    /**
+     * Set a user currency to session
+     * @param Currency $currency
+     */
     public static function setUserCurrency($currency)
     {
         if ($currency instanceof Currency) {
