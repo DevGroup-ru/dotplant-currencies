@@ -1,6 +1,7 @@
 <?php
 namespace DotPlant\Currencies\helpers;
 
+use DotPlant\Currencies\CurrenciesModule;
 use DotPlant\Currencies\models\Currency;
 use Yii;
 
@@ -149,5 +150,23 @@ class CurrencyHelper
             $result = preg_replace('%[\d\s,]%i', '', self::format(0, $currency));
         }
         return $result;
+    }
+
+    public static function getUserCurrency()
+    {
+        if (static::$userCurrency === null) {
+            $isoCode = Yii::$app->session->get(CurrenciesModule::CURRENCY_SESSION_KEY);
+            $userCurrency = CurrencyHelper::findCurrencyByIso($isoCode);
+            static::$userCurrency = $userCurrency !== null ? $userCurrency : static::getMainCurrency();
+        }
+        return static::$userCurrency;
+    }
+
+    public static function setUserCurrency($currency)
+    {
+        if ($currency instanceof Currency) {
+            static::$userCurrency = $currency;
+            Yii::$app->session->set(CurrenciesModule::CURRENCY_SESSION_KEY, $currency->iso_code);
+        }
     }
 }

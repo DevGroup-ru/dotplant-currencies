@@ -1,16 +1,19 @@
 <?php
+
 namespace DotPlant\Currencies;
 
 use DotPlant\Currencies\helpers\CurrencyStorageHelper;
 use DotPlant\Currencies\models\CurrencyRateProvider;
 use DotPlant\Currencies\models\BaseFileModel;
 use DotPlant\Currencies\models\Currency;
+use Yii;
 use yii\base\InvalidParamException;
 use yii\base\Module;
-use Yii;
 
 class CurrenciesModule extends Module
 {
+    const CURRENCY_SESSION_KEY = 'DotPlant:Currencies:CurrencyIsoCode';
+    const AFTER_USER_CURRENCY_CHANGE = 'dotplant.currencies.afterUserCurrencyChange';
 
     /** @var string Currency storage file */
     public $currenciesStorage = '@app/config/dp-currencies.php';
@@ -173,7 +176,7 @@ class CurrenciesModule extends Module
     {
         $module = Yii::$app->getModule('currencies');
         if ($module === null) {
-            $module = new self('currencies');
+            $module = Yii::createObject(self::class, ['currencies']);
         }
         return $module;
     }

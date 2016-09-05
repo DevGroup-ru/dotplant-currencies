@@ -18,12 +18,12 @@ $currencyButtons =
     Html::tag('div',
         Html::a(
             Icon::show('plus') . '&nbsp;' . Yii::t('dotplant.currencies', 'Add currency'),
-            ['/currencies/currencies/edit', 'returnUrl' => Helper::returnUrl()],
+            ['/currencies/currencies-manage/edit', 'returnUrl' => Helper::returnUrl()],
             ['role' => 'button', 'class' => 'btn btn-success']
         )
         . Html::a(
             Icon::show('eraser') . '&nbsp;' . Yii::t('dotplant.currencies', 'Reset currencies'),
-            ['/currencies/currencies/reset', 'returnUrl' => Helper::returnUrl()],
+            ['/currencies/currencies-manage/reset', 'returnUrl' => Helper::returnUrl()],
             ['role' => 'button', 'class' => 'btn btn-danger']),
         ['class' => 'btn-group pull-right', 'role' => 'group', 'aria-label' => 'Currencies buttons']
     );
@@ -71,13 +71,13 @@ echo GridView::widget([
             ],
             'buttons' => [
                 [
-                    'url' => '/currencies/currencies/edit',
+                    'url' => '/currencies/currencies-manage/edit',
                     'icon' => 'pencil',
                     'class' => 'btn-primary',
                     'label' => Yii::t('dotplant.currencies', 'Edit'),
                 ],
                 [
-                    'url' => '/currencies/currencies/delete',
+                    'url' => '/currencies/currencies-manage/delete',
                     'icon' => 'trash-o',
                     'class' => 'btn-danger',
                     'label' => Yii::t('dotplant.currencies', 'Delete'),

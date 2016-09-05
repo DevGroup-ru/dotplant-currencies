@@ -9,7 +9,7 @@ use DotPlant\Currencies\actions\ResetAction;
 use DotPlant\Currencies\CurrenciesModule;
 use Yii;
 
-class CurrencyRateProviderController extends BaseController
+class CurrencyRateProvidersManageController extends BaseController
 {
     /**
      * @inheritdoc

@@ -2,9 +2,9 @@
 
 namespace DotPlant\Currencies\models;
 
-use DotPlant\Currencies\controllers\CurrencyRateProviderController;
+use DotPlant\Currencies\controllers\CurrencyRateProvidersManageController;
 use DevGroup\ExtensionsManager\models\BaseConfigurationModel;
-use DotPlant\Currencies\controllers\CurrenciesController;
+use DotPlant\Currencies\controllers\CurrenciesManageController;
 use DotPlant\Currencies\commands\CurrencyController;
 use DotPlant\Currencies\CurrenciesModule;
 use Yii;
@@ -54,12 +54,7 @@ class CurrenciesConfiguration extends BaseConfigurationModel
      */
     public function webApplicationAttributes()
     {
-        return [
-            'controllerMap' => [
-                'currencies' => CurrenciesController::className(),
-                'providers' => CurrencyRateProviderController::className(),
-            ]
-        ];
+        return [];
     }
 
     /**

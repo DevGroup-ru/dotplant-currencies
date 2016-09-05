@@ -9,7 +9,7 @@ use DotPlant\Currencies\CurrenciesModule;
 use DotPlant\Currencies\models\Currency;
 use Yii;
 
-class CurrenciesController extends BaseController
+class CurrenciesManageController extends BaseController
 {
     /**
      * @inheritdoc
