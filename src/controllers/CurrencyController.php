@@ -22,10 +22,8 @@ class CurrencyController extends Controller
             $oldUserCurrency = CurrencyHelper::getUserCurrency();
             CurrencyHelper::setUserCurrency($newUserCurrency);
             $event = new AfterUserCurrencyChangeEvent;
-            $event->data = [
-                'oldUserCurrency' => $oldUserCurrency,
-                'newUserCurrency' => $newUserCurrency,
-            ];
+            $event->oldUserCurrency = $oldUserCurrency;
+            $event->newUserCurrency = $newUserCurrency;
             CurrenciesModule::module()->trigger(CurrenciesModule::AFTER_USER_CURRENCY_CHANGE, $event);
         }
         return $this->redirect(Yii::$app->request->referrer);

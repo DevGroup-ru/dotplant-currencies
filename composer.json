@@ -35,6 +35,9 @@
       "iconUrl": "",
       "description_ru": "Расширение для работы с валютами в DotPlant"
     },
+    "migrationPath": [
+      "src/migrations"
+    ],
     "configurables": "src/configurables.php",
     "translationCategory": "dotplant.currencies"
   }
